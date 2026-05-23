@@ -244,3 +244,50 @@ export interface UsageSummary {
 
 export const getUsage = (window: UsageWindow = "today", top = 5) =>
   api<UsageSummary>(`/usage?window=${window}&top=${top}`);
+
+// ---- Skills + memory ----------------------------------------------------
+
+export interface SkillRow {
+  id: string;
+  name: string;
+  description: string;
+  category: string | null;
+  size: number;
+  path: string;
+}
+
+export interface SkillsListResp {
+  skills: SkillRow[];
+  count: number;
+  root: string;
+}
+
+export interface SkillDetail {
+  id: string;
+  content: string;
+  size: number;
+  path: string;
+}
+
+export const getSkills = () => api<SkillsListResp>("/skills");
+
+export const getSkill = (id: string) =>
+  api<SkillDetail>(`/skills/${encodeURI(id)}`);
+
+export interface MemoryFile {
+  exists: boolean;
+  content: string;
+  size: number;
+  mtime: number;
+  path?: string;
+}
+
+export interface MemoryDump {
+  root: string;
+  files: {
+    memory: MemoryFile;
+    user: MemoryFile;
+  };
+}
+
+export const getMemory = () => api<MemoryDump>("/memory");
