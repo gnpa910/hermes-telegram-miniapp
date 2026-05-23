@@ -10,8 +10,8 @@ Three watch types:
    sessions; once it crosses the configured threshold, fires once per
    local-day (resets at 00:00).
 
-State lives in ``~/.hermes/plugins/telegram-app/alerts_state.json``.
-Settings live in ``~/.hermes/plugins/telegram-app/alerts.json`` and are
+State lives in ``~/.hermes/state/telegram-app/alerts_state.json``.
+Settings live in ``~/.hermes/state/telegram-app/alerts.json`` and are
 hot-readable so the SPA can update them without restarting the daemon.
 
 The daemon is started lazily at plugin import time via ``ensure_started()``;
@@ -100,9 +100,13 @@ def _state() -> Dict[str, Any]:
             "errors_last_size": 0,            # bytes already scanned
             "errors_last_alert_ts": 0.0,      # unix ts of last error alert
             "errors_last_signature": "",      # last alerted signature (dedup short-burst)
+            "errors_count_per_day": {},       # YYYY-MM-DD → count of error alerts emitted
             "cost_alerted_for_day": "",       # YYYY-MM-DD already alerted
             "cost_alerted_value": 0.0,
             "last_test_ts": 0.0,
+            "last_tick_ts": 0.0,              # unix ts of most recent watcher tick
+            "last_alert_ts": 0.0,             # unix ts of most recent alert sent (any kind)
+            "last_alert_kind": "",            # "cron" | "error" | "cost" | "test" | ""
         },
     )
 
@@ -205,6 +209,8 @@ def _check_cron_failures(state: Dict[str, Any]) -> None:
                 msg += "Open the Hermes mini app → Cron → tap the row to edit."
                 if _send_telegram(msg):
                     _log.info("alerts: notified cron failure for %s", j["id"])
+                    state["last_alert_ts"] = time.time()
+                    state["last_alert_kind"] = "cron"
 
 
 def _check_error_log(state: Dict[str, Any], settings: Dict[str, Any]) -> None:
@@ -263,6 +269,15 @@ def _check_error_log(state: Dict[str, Any], settings: Dict[str, Any]) -> None:
     if _send_telegram(msg):
         state["errors_last_alert_ts"] = now
         state["errors_last_signature"] = sig
+        state["last_alert_ts"] = now
+        state["last_alert_kind"] = "error"
+        today = _dt.datetime.now().strftime("%Y-%m-%d")
+        per_day = state.setdefault("errors_count_per_day", {})
+        per_day[today] = int(per_day.get(today, 0)) + 1
+        # Trim history to last 7 days so the dict can't grow forever.
+        if len(per_day) > 14:
+            for old in sorted(per_day.keys())[:-7]:
+                per_day.pop(old, None)
         _log.info("alerts: notified error burst (%d lines)", len(candidates))
 
 
@@ -303,6 +318,8 @@ def _check_cost_threshold(state: Dict[str, Any], settings: Dict[str, Any]) -> No
         if _send_telegram(msg):
             state["cost_alerted_for_day"] = today
             state["cost_alerted_value"] = total
+            state["last_alert_ts"] = time.time()
+            state["last_alert_kind"] = "cost"
             _log.info("alerts: notified cost threshold (%.2f >= %.2f)", total, threshold)
 
 
@@ -348,6 +365,7 @@ def _watcher_loop() -> None:
                 _check_error_log(state, settings)
             if settings.get("cost_threshold"):
                 _check_cost_threshold(state, settings)
+            state["last_tick_ts"] = time.time()
             _save_state(state)
         except Exception as exc:
             _log.exception("alerts: tick failed: %s", exc)
@@ -373,29 +391,54 @@ def ensure_started() -> None:
 
 def trigger_test() -> Dict[str, Any]:
     """Fire a synthetic test message immediately."""
+    creds = _bot_token_and_chat()
+    if not creds:
+        return {
+            "ok": True,
+            "sent": False,
+            "reason": "no_bot_token_or_owner_chat",
+        }
     text = (
         "✅ Hermes alerts test\n"
         "If you can see this, alerts are wired up and your bot is reachable."
     )
     sent = _send_telegram(text)
     state = _state()
-    state["last_test_ts"] = time.time()
+    now = time.time()
+    state["last_test_ts"] = now
+    if sent:
+        state["last_alert_ts"] = now
+        state["last_alert_kind"] = "test"
     _save_state(state)
-    return {"ok": sent, "sent_at": state["last_test_ts"]}
+    return {
+        "ok": True,
+        "sent": sent,
+        "reason": None if sent else "telegram_api_rejected",
+    }
 
 
 def get_status() -> Dict[str, Any]:
-    """Return settings + state for the SPA."""
+    """Return settings + state for the SPA.
+
+    Shape mirrors the frontend ``AlertsStatus`` interface:
+      settings, running, last_tick, last_alert_at, last_alert_kind,
+      errors_emitted_today, cron_failures_seen, state_path,
+      has_bot_token, has_owner_chat.
+    """
     settings = get_settings()
     state = _state()
+    creds = _bot_token_and_chat()
+    today = _dt.datetime.now().strftime("%Y-%m-%d")
+    errors_per_day = state.get("errors_count_per_day") or {}
     return {
         "settings": settings,
-        "state": {
-            "errors_last_alert_ts": state.get("errors_last_alert_ts", 0),
-            "cost_alerted_for_day": state.get("cost_alerted_for_day", ""),
-            "cost_alerted_value": state.get("cost_alerted_value", 0),
-            "last_test_ts": state.get("last_test_ts", 0),
-        },
-        "thread_running": _thread_started,
-        "creds_configured": _bot_token_and_chat() is not None,
+        "running": _thread_started,
+        "last_tick": float(state.get("last_tick_ts") or 0) or None,
+        "last_alert_at": float(state.get("last_alert_ts") or 0) or None,
+        "last_alert_kind": state.get("last_alert_kind") or None,
+        "errors_emitted_today": int(errors_per_day.get(today, 0) or 0),
+        "cron_failures_seen": len(state.get("cron_last_alert_per_job") or {}),
+        "state_path": str(_STATE_PATH),
+        "has_bot_token": bool(creds and creds[0]),
+        "has_owner_chat": bool(creds and creds[1]),
     }
