@@ -33,7 +33,7 @@ from typing import Any, Dict, List, Optional
 
 _log = logging.getLogger("hermes.plugin.telegram-app.alerts")
 
-_PLUGIN_DIR = Path.home() / ".hermes" / "plugins" / "telegram-app"
+_PLUGIN_DIR = Path.home() / ".hermes" / "state" / "telegram-app"
 _PLUGIN_DIR.mkdir(parents=True, exist_ok=True)
 _SETTINGS_PATH = _PLUGIN_DIR / "alerts.json"
 _STATE_PATH = _PLUGIN_DIR / "alerts_state.json"
