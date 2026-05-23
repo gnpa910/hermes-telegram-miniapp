@@ -333,3 +333,40 @@ export interface MemoryDump {
 }
 
 export const getMemory = () => api<MemoryDump>("/memory");
+
+// ---- Push alerts --------------------------------------------------------
+
+export interface AlertsSettings {
+  cron_failures: boolean;
+  error_log: boolean;
+  cost_threshold: boolean;
+  cost_daily_usd: number;
+  error_throttle_sec: number;
+  poll_interval_sec: number;
+}
+
+export interface AlertsStatus {
+  settings: AlertsSettings;
+  running: boolean;
+  last_tick: number | null;
+  last_alert_at: number | null;
+  last_alert_kind: string | null;
+  errors_emitted_today: number;
+  cron_failures_seen: number;
+  state_path: string;
+  has_bot_token: boolean;
+  has_owner_chat: boolean;
+}
+
+export const getAlerts = () => api<AlertsStatus>("/alerts");
+
+export const updateAlerts = (patch: Partial<AlertsSettings>) =>
+  api<AlertsStatus>("/alerts", {
+    method: "PATCH",
+    body: JSON.stringify(patch),
+  });
+
+export const testAlert = () =>
+  api<{ ok: boolean; sent: boolean; reason?: string }>("/alerts/test", {
+    method: "POST",
+  });

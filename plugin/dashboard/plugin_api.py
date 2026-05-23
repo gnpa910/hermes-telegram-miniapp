@@ -78,6 +78,32 @@ _allow_public([
 ])
 
 
+# ---------------------------------------------------------------------------
+# Alerts watcher — starts a background thread on first import that polls
+# cron jobs / errors.log / daily cost and DMs the owner via the bot.
+# ---------------------------------------------------------------------------
+try:
+    from . import alerts as _alerts  # type: ignore
+except Exception:
+    # Plugin loader runs us as a top-level module, not a package — try the
+    # sibling-file import.
+    try:
+        import sys as _sys
+        _here = Path(__file__).parent
+        if str(_here) not in _sys.path:
+            _sys.path.insert(0, str(_here))
+        import alerts as _alerts  # type: ignore
+    except Exception as _exc:
+        _alerts = None  # type: ignore
+        _log.warning("alerts module unavailable: %s", _exc)
+
+if _alerts is not None:
+    try:
+        _alerts.ensure_started()
+    except Exception as _exc:
+        _log.warning("alerts ensure_started failed: %s", _exc)
+
+
 def _get_session_token() -> str:
     """Fetch the dashboard session token from the running web_server module.
 
@@ -1018,3 +1044,40 @@ async def send_command(body: _SendCommandBody):
     except Exception as exc:
         _log.exception("send_command failed")
         raise HTTPException(status_code=502, detail=str(exc))
+
+
+# ---------------------------------------------------------------------------
+# Push alerts — settings + status + manual test
+# ---------------------------------------------------------------------------
+class _AlertsSettingsBody(BaseModel):
+    cron_failures: Optional[bool] = None
+    error_log: Optional[bool] = None
+    cost_threshold: Optional[bool] = None
+    cost_daily_usd: Optional[float] = None
+    error_throttle_sec: Optional[int] = None
+    poll_interval_sec: Optional[int] = None
+
+
+@router.get("/alerts")
+async def alerts_get():
+    if _alerts is None:
+        raise HTTPException(status_code=503, detail="alerts module not available")
+    return _alerts.get_status()
+
+
+@router.patch("/alerts")
+async def alerts_patch(body: _AlertsSettingsBody):
+    if _alerts is None:
+        raise HTTPException(status_code=503, detail="alerts module not available")
+    patch = {k: v for k, v in body.model_dump(exclude_unset=True).items() if v is not None}
+    if not patch:
+        raise HTTPException(status_code=400, detail="no fields to update")
+    _alerts.update_settings(patch)
+    return _alerts.get_status()
+
+
+@router.post("/alerts/test")
+async def alerts_test():
+    if _alerts is None:
+        raise HTTPException(status_code=503, detail="alerts module not available")
+    return _alerts.trigger_test()
