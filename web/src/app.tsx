@@ -5,9 +5,10 @@ import { StatusTab } from "./tabs/StatusTab";
 import { SessionsTab } from "./tabs/SessionsTab";
 import { SessionDetail } from "./tabs/SessionDetail";
 import { CronTab } from "./tabs/CronTab";
+import { LogsTab } from "./tabs/LogsTab";
 import { SendTab } from "./tabs/SendTab";
 
-type Tab = "status" | "sessions" | "cron" | "send";
+type Tab = "status" | "sessions" | "cron" | "logs" | "send";
 
 interface View {
   tab: Tab;
@@ -149,6 +150,7 @@ export function App() {
           />
         )}
         {view.tab === "cron" && <CronTab />}
+        {view.tab === "logs" && <LogsTab />}
         {view.tab === "send" && <SendTab />}
       </main>
       <nav className="tab-bar">
@@ -169,6 +171,12 @@ export function App() {
           icon="⏱"
           label="Cron"
           onClick={() => setView({ tab: "cron" })}
+        />
+        <TabButton
+          active={view.tab === "logs"}
+          icon="📜"
+          label="Logs"
+          onClick={() => setView({ tab: "logs" })}
         />
         <TabButton
           active={view.tab === "send"}

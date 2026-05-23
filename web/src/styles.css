@@ -634,3 +634,154 @@ body[data-scheme="light"] {
 .history-row {
   margin-bottom: var(--space-2);
 }
+
+/* ---- Logs viewer --------------------------------------------------- */
+
+.filter-bar {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: 0 var(--space-4) var(--space-3);
+}
+
+.filter-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.filter-label {
+  font-size: 11px;
+  color: var(--tg-hint);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  width: 44px;
+  flex-shrink: 0;
+}
+
+.filter-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.filter-pill {
+  background: var(--tg-section);
+  color: var(--tg-text);
+  font-size: 12px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  transition: background-color 0.12s, color 0.12s;
+}
+
+.filter-pill[data-active="true"] {
+  background: var(--tg-accent);
+  color: var(--tg-button-text);
+}
+
+.toggle-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  color: var(--tg-hint);
+  padding: 2px 8px;
+  background: var(--tg-section);
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+.toggle-pill input {
+  width: 0;
+  height: 0;
+  appearance: none;
+  margin: 0;
+}
+
+.toggle-pill input:checked + span {
+  color: var(--tg-accent);
+  font-weight: 600;
+}
+
+.toggle-pill input:checked + span::before {
+  content: "● ";
+  color: var(--tg-accent);
+  margin-right: 2px;
+}
+
+.log-viewer {
+  margin: 0 var(--space-4) var(--space-2);
+  background: var(--tg-section);
+  border-radius: var(--radius);
+  padding: var(--space-3);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 11px;
+  line-height: 1.45;
+  max-height: 60vh;
+  overflow-y: auto;
+  overflow-x: auto;
+  scrollbar-width: thin;
+  scrollbar-gutter: stable;
+}
+
+.log-empty {
+  text-align: center;
+  color: var(--tg-hint);
+  padding: var(--space-4);
+}
+
+.log-line {
+  padding: 1px 4px;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  border-radius: 2px;
+}
+
+.log-info {
+  color: var(--tg-text);
+}
+
+.log-debug {
+  color: var(--tg-hint);
+  opacity: 0.65;
+}
+
+.log-warning {
+  color: #fbbf24;
+  background: rgba(251, 191, 36, 0.06);
+}
+
+.log-error {
+  color: var(--tg-destructive);
+  background: rgba(248, 113, 113, 0.08);
+}
+
+.log-footer {
+  margin: 0 var(--space-4) var(--space-3);
+  display: flex;
+  gap: var(--space-3);
+  font-size: 11px;
+  color: var(--tg-hint);
+  align-items: center;
+}
+
+.spinner-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--tg-accent);
+  animation: pulse 1.2s infinite;
+  margin-left: auto;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 0.3; }
+  50% { opacity: 1; }
+}
+
+/* Compact tab labels with 5 tabs ------------------------------------- */
+@media (max-width: 380px) {
+  .tab-bar button {
+    font-size: 10px;
+  }
+}

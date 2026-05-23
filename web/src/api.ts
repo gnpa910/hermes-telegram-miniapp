@@ -192,3 +192,24 @@ export const sendCommand = (text: string) =>
     method: "POST",
     body: JSON.stringify({ text }),
   });
+
+export type LogFile = "agent" | "errors" | "gateway";
+export type LogLevel = "ALL" | "DEBUG" | "INFO" | "WARNING" | "ERROR" | "CRITICAL";
+
+export interface LogsResponse {
+  file: LogFile;
+  level: LogLevel;
+  lines: string[];
+  count: number;
+  mtime: number;
+  path: string;
+}
+
+export const getLogs = (
+  file: LogFile = "agent",
+  lines = 200,
+  level: LogLevel = "ALL",
+) =>
+  api<LogsResponse>(
+    `/logs?file=${file}&lines=${lines}&level=${level}`,
+  );
