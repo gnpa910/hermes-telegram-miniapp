@@ -7,7 +7,7 @@
   "tab": {
     "path": "/telegram-app",
     "position": "after:cron",
-    "hidden": true
+    "hidden": false
   },
   "slots": [],
   "entry": "dist/index.js",

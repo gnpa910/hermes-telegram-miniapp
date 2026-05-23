@@ -1095,3 +1095,36 @@ body[data-scheme="light"] {
   background: transparent;
   border: 1px solid var(--border);
 }
+
+/* ---- Pull-to-refresh ------------------------------------------- */
+.ptr-wrap {
+  position: relative;
+  will-change: transform;
+}
+
+.ptr-indicator {
+  position: absolute;
+  top: -36px;
+  left: 0;
+  right: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  color: var(--fg-dim);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  overflow: hidden;
+  pointer-events: none;
+  transition: opacity 120ms ease;
+}
+
+.ptr-indicator[data-active="true"] {
+  color: var(--accent, #3b82f6);
+}
+
+.spinner.small {
+  width: 14px;
+  height: 14px;
+  border-width: 2px;
+}

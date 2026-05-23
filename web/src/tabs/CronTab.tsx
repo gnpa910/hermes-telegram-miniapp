@@ -9,7 +9,7 @@ import {
   getCron,
 } from "../api";
 import { formatRelative, truncate } from "../utils";
-import { ErrorBox, Loading, SectionTitle, tgHaptic, tgHapticImpact } from "../components";
+import { ErrorBox, Loading, PullToRefresh, SectionTitle, tgHaptic, tgHapticImpact } from "../components";
 
 const SCHEDULE_PRESETS: { label: string; value: string }[] = [
   { label: "Every 30m", value: "30m" },
@@ -158,11 +158,11 @@ export function CronTab() {
     }
   };
 
-  if (error) return <ErrorBox msg={error} />;
+  if (error && !jobs) return <ErrorBox msg={error} />;
   if (!jobs) return <Loading />;
 
   return (
-    <>
+    <PullToRefresh onRefresh={refresh}>
       <div className="section-title-row">
         <SectionTitle>Scheduled jobs</SectionTitle>
         <button
@@ -174,6 +174,8 @@ export function CronTab() {
           + New
         </button>
       </div>
+
+      {error && <ErrorBox msg={error} />}
 
       {showForm && (
         <CronForm
@@ -261,7 +263,7 @@ export function CronTab() {
           </div>
         );
       })}
-    </>
+    </PullToRefresh>
   );
 }
 
