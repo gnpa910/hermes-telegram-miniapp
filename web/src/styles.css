@@ -565,3 +565,72 @@ body[data-scheme="light"] {
   --tg-divider: rgba(0, 0, 0, 0.08);
   --tg-destructive: #dc2626;
 }
+
+/* ---- Section header w/ inline action ------------------------------- */
+
+.section-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-right: var(--space-4);
+}
+
+.ghost-btn {
+  font-size: 12px;
+  color: var(--tg-link);
+  background: transparent;
+  padding: var(--space-1) var(--space-2);
+}
+
+.ghost-btn:active {
+  opacity: 0.6;
+}
+
+/* ---- Chips (presets) ----------------------------------------------- */
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  padding: 0 var(--space-4) var(--space-3);
+}
+
+.chip-wrap {
+  display: inline-flex;
+  align-items: stretch;
+}
+
+.chip {
+  background: var(--tg-section);
+  color: var(--tg-text);
+  border-radius: 999px;
+  padding: var(--space-2) var(--space-3);
+  font-size: 13px;
+  line-height: 1.2;
+  max-width: 260px;
+  text-align: left;
+  transition: background-color 0.12s, transform 0.1s;
+}
+
+.chip:active {
+  background: var(--tg-bg-secondary);
+  transform: scale(0.97);
+}
+
+.chip-wrap .chip-x {
+  background: var(--tg-section);
+  color: var(--tg-destructive);
+  margin-left: 4px;
+  border-radius: 999px;
+  width: 28px;
+  font-size: 16px;
+  line-height: 1;
+}
+
+.chip-wrap .chip-x:active {
+  background: var(--tg-bg-secondary);
+}
+
+.history-row {
+  margin-bottom: var(--space-2);
+}
