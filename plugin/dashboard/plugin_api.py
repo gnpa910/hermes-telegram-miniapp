@@ -479,10 +479,119 @@ async def session_messages(session_id: str, limit: int = 200):
 async def cron_list():
     try:
         from cron.jobs import list_jobs  # type: ignore
-        return {"jobs": list_jobs()}
+        # include_disabled=True so the UI can show paused jobs and resume them.
+        return {"jobs": list_jobs(include_disabled=True)}
     except Exception as exc:
         _log.exception("cron list failed")
         raise HTTPException(status_code=500, detail=str(exc))
+
+
+class _CronCreateBody(BaseModel):
+    prompt: Optional[str] = None
+    schedule: str
+    name: Optional[str] = None
+    deliver: Optional[str] = None  # "origin" | "local" | "telegram" | ...
+    repeat: Optional[int] = None
+    skills: Optional[List[str]] = None
+    enabled_toolsets: Optional[List[str]] = None
+    workdir: Optional[str] = None
+    model: Optional[str] = None
+    provider: Optional[str] = None
+    no_agent: bool = False
+    script: Optional[str] = None
+
+
+@router.post("/cron")
+async def cron_create(body: _CronCreateBody):
+    """Create a new cron job. Same kwargs as ``cron.jobs.create_job``."""
+    try:
+        from cron.jobs import create_job  # type: ignore
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=str(exc))
+
+    if not body.schedule:
+        raise HTTPException(status_code=400, detail="schedule is required")
+    if body.no_agent:
+        if not body.script:
+            raise HTTPException(
+                status_code=400,
+                detail="script is required when no_agent=True",
+            )
+    else:
+        if not body.prompt:
+            raise HTTPException(
+                status_code=400, detail="prompt is required for agent jobs"
+            )
+
+    try:
+        job = create_job(
+            prompt=body.prompt,
+            schedule=body.schedule,
+            name=body.name,
+            deliver=body.deliver,
+            repeat=body.repeat,
+            skills=body.skills,
+            enabled_toolsets=body.enabled_toolsets,
+            workdir=body.workdir,
+            model=body.model,
+            provider=body.provider,
+            no_agent=body.no_agent,
+            script=body.script,
+        )
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc))
+    except Exception as exc:
+        _log.exception("cron create failed")
+        raise HTTPException(status_code=500, detail=str(exc))
+    return {"ok": True, "job": job}
+
+
+class _CronUpdateBody(BaseModel):
+    name: Optional[str] = None
+    schedule: Optional[str] = None
+    prompt: Optional[str] = None
+    deliver: Optional[str] = None
+    repeat: Optional[int] = None
+    skills: Optional[List[str]] = None
+    enabled_toolsets: Optional[List[str]] = None
+
+
+@router.patch("/cron/{job_id}")
+async def cron_update(job_id: str, body: _CronUpdateBody):
+    try:
+        from cron.jobs import update_job  # type: ignore
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=str(exc))
+    updates: Dict[str, Any] = {}
+    for k, v in body.model_dump(exclude_unset=True).items():
+        if v is not None:
+            updates[k] = v
+    if not updates:
+        raise HTTPException(status_code=400, detail="no fields to update")
+    try:
+        job = update_job(job_id, updates)
+    except Exception as exc:
+        _log.exception("cron update failed")
+        raise HTTPException(status_code=500, detail=str(exc))
+    if not job:
+        raise HTTPException(status_code=404, detail="job not found")
+    return {"ok": True, "job": job}
+
+
+@router.delete("/cron/{job_id}")
+async def cron_delete(job_id: str):
+    try:
+        from cron.jobs import remove_job  # type: ignore
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=str(exc))
+    try:
+        ok = remove_job(job_id)
+    except Exception as exc:
+        _log.exception("cron delete failed")
+        raise HTTPException(status_code=500, detail=str(exc))
+    if not ok:
+        raise HTTPException(status_code=404, detail="job not found")
+    return {"ok": True, "id": job_id, "action": "deleted"}
 
 
 # ---------------------------------------------------------------------------

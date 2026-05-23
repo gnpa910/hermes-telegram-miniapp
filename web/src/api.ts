@@ -187,6 +187,48 @@ export const cronAction = (id: string, action: "pause" | "resume" | "trigger") =
     method: "POST",
   });
 
+export interface CronCreatePayload {
+  prompt?: string;
+  schedule: string;
+  name?: string;
+  deliver?: string;
+  repeat?: number;
+  skills?: string[];
+  enabled_toolsets?: string[];
+  workdir?: string;
+  model?: string;
+  provider?: string;
+  no_agent?: boolean;
+  script?: string;
+}
+
+export const cronCreate = (payload: CronCreatePayload) =>
+  api<{ ok: boolean; job: CronJob }>("/cron", {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+
+export interface CronUpdatePayload {
+  name?: string;
+  schedule?: string;
+  prompt?: string;
+  deliver?: string;
+  repeat?: number;
+  skills?: string[];
+  enabled_toolsets?: string[];
+}
+
+export const cronUpdate = (id: string, payload: CronUpdatePayload) =>
+  api<{ ok: boolean; job: CronJob }>(`/cron/${id}`, {
+    method: "PATCH",
+    body: JSON.stringify(payload),
+  });
+
+export const cronDelete = (id: string) =>
+  api<{ ok: boolean; id: string; action: string }>(`/cron/${id}`, {
+    method: "DELETE",
+  });
+
 export const sendCommand = (text: string) =>
   api<{ ok: boolean; message_id: number }>("/command", {
     method: "POST",
