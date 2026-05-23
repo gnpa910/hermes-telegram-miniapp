@@ -1,0 +1,428 @@
+/* Minimal mobile-first stylesheet — no framework, theme-aware via Telegram
+   ThemeParams CSS variables set by app.tsx on mount. */
+
+* {
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+}
+
+:root {
+  /* Defaults — overridden by Telegram theme params at runtime. */
+  --tg-bg: #0d0d10;
+  --tg-bg-secondary: #16161b;
+  --tg-section: #1c1c22;
+  --tg-text: #ececec;
+  --tg-hint: #8a8a93;
+  --tg-link: #7faaff;
+  --tg-accent: #5eead4;
+  --tg-button: #5eead4;
+  --tg-button-text: #0d0d10;
+  --tg-divider: rgba(255, 255, 255, 0.06);
+  --tg-destructive: #f87171;
+
+  /* Spacing scale */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+  --radius: 12px;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  font-size: 15px;
+  line-height: 1.4;
+  color: var(--tg-text);
+  background: var(--tg-bg);
+  -webkit-font-smoothing: antialiased;
+  overscroll-behavior-y: contain;
+}
+
+#root {
+  min-height: 100vh;
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+a {
+  color: var(--tg-link);
+  text-decoration: none;
+}
+
+button {
+  font: inherit;
+  color: inherit;
+  background: none;
+  border: 0;
+  cursor: pointer;
+  padding: 0;
+}
+
+/* ---- App layout ------------------------------------------------------- */
+
+.app {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.app-header {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  padding: calc(env(safe-area-inset-top) + var(--space-3)) var(--space-4) var(--space-3);
+  background: var(--tg-bg);
+  border-bottom: 1px solid var(--tg-divider);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.app-header h1 {
+  margin: 0;
+  font-size: 17px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.app-header .user-chip {
+  font-size: 13px;
+  color: var(--tg-hint);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.app-header .user-chip .dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--tg-accent);
+}
+
+.app-content {
+  flex: 1;
+  padding: var(--space-3) 0 80px;
+}
+
+/* ---- Tabs ------------------------------------------------------------- */
+
+.tab-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  background: var(--tg-bg-secondary);
+  border-top: 1px solid var(--tg-divider);
+  padding: var(--space-2) 0 calc(env(safe-area-inset-bottom) + var(--space-2));
+  z-index: 20;
+}
+
+.tab-bar button {
+  flex: 1;
+  padding: var(--space-2);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  font-size: 11px;
+  color: var(--tg-hint);
+  transition: color 0.15s;
+}
+
+.tab-bar button[data-active="true"] {
+  color: var(--tg-accent);
+}
+
+.tab-bar .tab-icon {
+  font-size: 18px;
+}
+
+/* ---- Sections + cards ------------------------------------------------- */
+
+.section {
+  margin: 0 var(--space-4) var(--space-4);
+}
+
+.section-title {
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--tg-hint);
+  margin: var(--space-4) var(--space-1) var(--space-2);
+}
+
+.card {
+  background: var(--tg-section);
+  border-radius: var(--radius);
+  padding: var(--space-4);
+  margin-bottom: var(--space-3);
+}
+
+.card.row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.card .label {
+  color: var(--tg-hint);
+  font-size: 13px;
+}
+
+.card .value {
+  font-weight: 600;
+  font-size: 17px;
+}
+
+/* ---- Status gauges --------------------------------------------------- */
+
+.gauges {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-3);
+  margin: 0 var(--space-4) var(--space-4);
+}
+
+.gauge {
+  background: var(--tg-section);
+  border-radius: var(--radius);
+  padding: var(--space-4);
+}
+
+.gauge .name {
+  font-size: 12px;
+  color: var(--tg-hint);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.gauge .pct {
+  font-size: 24px;
+  font-weight: 700;
+  margin-top: 2px;
+}
+
+.gauge .sub {
+  font-size: 12px;
+  color: var(--tg-hint);
+}
+
+.gauge .bar {
+  height: 4px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 2px;
+  margin-top: var(--space-3);
+  overflow: hidden;
+}
+
+.gauge .bar > div {
+  height: 100%;
+  background: var(--tg-accent);
+  transition: width 0.3s;
+}
+
+.gauge.warn .bar > div { background: #fbbf24; }
+.gauge.crit .bar > div { background: var(--tg-destructive); }
+
+/* ---- Lists ----------------------------------------------------------- */
+
+.list-item {
+  background: var(--tg-section);
+  border-radius: var(--radius);
+  padding: var(--space-3) var(--space-4);
+  margin: 0 var(--space-4) var(--space-2);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.list-item .item-title {
+  font-weight: 500;
+  font-size: 15px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.list-item .item-preview {
+  font-size: 13px;
+  color: var(--tg-hint);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.list-item .item-meta {
+  font-size: 11px;
+  color: var(--tg-hint);
+  display: flex;
+  gap: var(--space-3);
+}
+
+.list-item .item-meta .src {
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* ---- Empty / loading states ------------------------------------------ */
+
+.empty, .loading, .error-box {
+  text-align: center;
+  padding: var(--space-6) var(--space-4);
+  color: var(--tg-hint);
+  font-size: 14px;
+}
+
+.error-box {
+  color: var(--tg-destructive);
+  background: rgba(248, 113, 113, 0.08);
+  margin: var(--space-4);
+  border-radius: var(--radius);
+}
+
+.spinner {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  border: 2px solid currentColor;
+  border-right-color: transparent;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ---- Compose ---------------------------------------------------------- */
+
+.compose {
+  margin: 0 var(--space-4) var(--space-4);
+  background: var(--tg-section);
+  border-radius: var(--radius);
+  padding: var(--space-4);
+}
+
+.compose textarea {
+  width: 100%;
+  background: var(--tg-bg);
+  color: var(--tg-text);
+  border: 1px solid var(--tg-divider);
+  border-radius: 8px;
+  padding: var(--space-3);
+  font: inherit;
+  resize: vertical;
+  min-height: 80px;
+  outline: none;
+}
+
+.compose textarea:focus {
+  border-color: var(--tg-accent);
+}
+
+.compose .actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: var(--space-3);
+}
+
+.btn-primary {
+  background: var(--tg-button);
+  color: var(--tg-button-text);
+  padding: var(--space-3) var(--space-5);
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 14px;
+  transition: opacity 0.2s;
+}
+
+.btn-primary:disabled {
+  opacity: 0.5;
+}
+
+.btn-secondary {
+  background: var(--tg-bg-secondary);
+  color: var(--tg-text);
+  padding: var(--space-2) var(--space-4);
+  border-radius: 8px;
+  font-size: 13px;
+}
+
+/* ---- Cron rows ------------------------------------------------------- */
+
+.cron-row {
+  background: var(--tg-section);
+  border-radius: var(--radius);
+  margin: 0 var(--space-4) var(--space-2);
+  padding: var(--space-3) var(--space-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.cron-row .name {
+  font-weight: 500;
+}
+
+.cron-row .meta {
+  font-size: 12px;
+  color: var(--tg-hint);
+  display: flex;
+  gap: var(--space-3);
+  align-items: center;
+}
+
+.cron-row .actions {
+  display: flex;
+  gap: var(--space-2);
+  margin-top: var(--space-2);
+}
+
+.cron-row .badge {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: rgba(94, 234, 212, 0.15);
+  color: var(--tg-accent);
+}
+
+.cron-row .badge.paused {
+  background: rgba(251, 191, 36, 0.15);
+  color: #fbbf24;
+}
+
+/* ---- Auth gate ------------------------------------------------------- */
+
+.auth-gate {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  padding: var(--space-5);
+  text-align: center;
+  gap: var(--space-3);
+}
+
+.auth-gate h2 {
+  margin: 0;
+  font-size: 22px;
+}
+
+.auth-gate p {
+  margin: 0;
+  color: var(--tg-hint);
+  font-size: 14px;
+  max-width: 280px;
+}
