@@ -213,3 +213,34 @@ export const getLogs = (
   api<LogsResponse>(
     `/logs?file=${file}&lines=${lines}&level=${level}`,
   );
+
+// ---- Usage / cost --------------------------------------------------------
+
+export type UsageWindow = "today" | "week" | "month" | "all";
+
+export interface UsageTopSession {
+  id: string;
+  title: string;
+  source: string;
+  model: string;
+  input_tokens: number;
+  output_tokens: number;
+  estimated_cost_usd: number;
+  message_count: number;
+  last_active: number | null;
+}
+
+export interface UsageSummary {
+  window: UsageWindow;
+  session_count: number;
+  input_tokens: number;
+  output_tokens: number;
+  total_tokens: number;
+  estimated_cost_usd: number;
+  message_count: number;
+  top_sessions: UsageTopSession[];
+  as_of: number;
+}
+
+export const getUsage = (window: UsageWindow = "today", top = 5) =>
+  api<UsageSummary>(`/usage?window=${window}&top=${top}`);

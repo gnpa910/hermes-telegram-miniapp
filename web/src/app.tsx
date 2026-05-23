@@ -134,7 +134,13 @@ export function App() {
         </div>
       </header>
       <main className="app-content">
-        {view.tab === "status" && <StatusTab />}
+        {view.tab === "status" && (
+          <StatusTab
+            onOpenSession={(id, title) =>
+              setView({ tab: "sessions", sessionId: id, sessionTitle: title })
+            }
+          />
+        )}
         {view.tab === "sessions" && !inDetail && (
           <SessionsTab
             onOpen={(id, title) =>
