@@ -426,3 +426,142 @@ button {
   font-size: 14px;
   max-width: 280px;
 }
+
+/* ---- Tappable list items (sessions, etc) ---------------------------- */
+
+.list-item.tappable {
+  width: calc(100% - 2 * var(--space-4));
+  text-align: left;
+  cursor: pointer;
+  border: 0;
+  font: inherit;
+  color: inherit;
+  background: var(--tg-section);
+  transition: background-color 0.15s, transform 0.1s;
+}
+
+.list-item.tappable:active {
+  background: var(--tg-bg-secondary);
+  transform: scale(0.99);
+}
+
+/* ---- Session detail (messages view) --------------------------------- */
+
+.detail-header {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  background: var(--tg-bg);
+  border-bottom: 1px solid var(--tg-divider);
+  padding: var(--space-2) var(--space-4);
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.back-btn {
+  background: var(--tg-bg-secondary);
+  color: var(--tg-text);
+  padding: var(--space-1) var(--space-3);
+  border-radius: 6px;
+  font-size: 13px;
+  flex-shrink: 0;
+}
+
+.detail-title {
+  flex: 1;
+  font-weight: 500;
+  font-size: 14px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.messages {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-4);
+}
+
+.msg {
+  background: var(--tg-section);
+  border-radius: var(--radius);
+  padding: var(--space-3);
+}
+
+.msg-meta {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-bottom: 4px;
+  font-size: 11px;
+}
+
+.msg-role {
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.msg-ts {
+  color: var(--tg-hint);
+}
+
+.msg-body {
+  font-size: 14px;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  overflow-wrap: anywhere;
+}
+
+.msg-user {
+  background: rgba(94, 234, 212, 0.08);
+}
+
+.msg-user .msg-role {
+  color: var(--tg-accent);
+}
+
+.msg-assistant .msg-role {
+  color: var(--tg-link);
+}
+
+.msg-tool {
+  background: rgba(251, 191, 36, 0.06);
+}
+
+.msg-tool .msg-role {
+  color: #fbbf24;
+}
+
+.msg-tool .msg-body {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 12px;
+}
+
+.msg-system {
+  opacity: 0.7;
+}
+
+.msg-system .msg-body {
+  font-size: 12px;
+  color: var(--tg-hint);
+}
+
+/* ---- Light scheme tweaks (when prefers-color-scheme: light w/o TG) ---- */
+
+body[data-scheme="light"] {
+  --tg-bg: #ffffff;
+  --tg-bg-secondary: #f3f4f6;
+  --tg-section: #f9fafb;
+  --tg-text: #111827;
+  --tg-hint: #6b7280;
+  --tg-link: #2563eb;
+  --tg-accent: #0d9488;
+  --tg-button: #0d9488;
+  --tg-button-text: #ffffff;
+  --tg-divider: rgba(0, 0, 0, 0.08);
+  --tg-destructive: #dc2626;
+}
