@@ -41,6 +41,10 @@ if [[ "${SKIP_BUILD:-0}" != "1" ]]; then
     log "Frontend built — $(du -sh "$HERE/dist" | cut -f1)"
 else
     log "Skipping frontend build (SKIP_BUILD=1)"
+    if [[ ! -d "$HERE/dist" ]]; then
+        warn "dist/ not found and SKIP_BUILD=1 — SPA will NOT be deployed!"
+        warn "Run without SKIP_BUILD to build, or: cd web && npm install && npm run build"
+    fi
 fi
 
 # ---- Deploy to web root ---------------------------------------------------
@@ -51,6 +55,10 @@ if [[ "${SKIP_DEPLOY:-0}" != "1" ]] && [[ -d "$HERE/dist" ]]; then
     fi
     log "Copying dist/ → $WEB_ROOT/"
     ${SUDO:-} cp -r "$HERE/dist/." "$WEB_ROOT/"
+else
+    if [[ "${SKIP_DEPLOY:-0}" != "1" ]]; then
+        warn "dist/ not found — skipping deploy to $WEB_ROOT"
+    fi
 fi
 
 # ---- Symlink plugin --------------------------------------------------------
